@@ -2,12 +2,13 @@
 ## [Paper (ArXiv)](https://arxiv.org/abs/2408.17064) 
 
 Official Implementation for CVPR 2025 paper Instant Adversarial Purification with Adversarial Consistency Distillation.
+
 ![teaser](asset/teaser.png)
 
 
-**Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5.
+**Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5 with a special LCM LoRA objective.
 ## Training objective
-![more](assert/pipeline_l.png)
+![obj](asset/pipeline_l.png)
 
 ---
 ## Train
@@ -18,6 +19,7 @@ bash train_lora.sh
 ```
 ---
 ## Evaluation
+Evaluation code for ImageNet is provided.
 
 ```
 bash test.sh
@@ -30,7 +32,7 @@ bash test.sh
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
-@inproceedings{lei2024instant,
+@inproceedings{lei2025instant,
                title={Instant adversarial purification with adversarial consistency distillation},
                author={Lei, Chun Tong and Yam, Hon Ming and Guo, Zhongliang and Qian, Yifei and Lau, Chun Pong},
                year={2025},
