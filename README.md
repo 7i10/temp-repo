@@ -1,1 +1,35 @@
-# InstantPure
+# Instant Adversarial Purification with Adversarial Consistency Distillation (CVPR2025)
+## [Paper (ArXiv)](https://arxiv.org/abs/2408.17064) 
+
+Official Implementation for CVPR 2025 paper Instant Adversarial Purification with Adversarial Consistency Distillation.
+![teaser](asset/teaser.pdf)
+
+
+**Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5.
+
+---
+## Train
+Once you have prepared the data, you can train the model using the following command. 
+
+```
+CUDA_VISIBLE_DEVICES=0 bash train_lora.sh
+```
+---
+## Evaluation
+
+```
+CUDA_VISIBLE_DEVICES=0 bash test.sh
+```
+---
+## Pipeline
+![more](asset/Pipeline.pdf)
+## Citation
+Consider cite us if you find our paper is useful in your research :).
+```
+@inproceedings{lei2024instant,
+               title={Instant adversarial purification with adversarial consistency distillation},
+               author={Lei, Chun Tong and Yam, Hon Ming and Guo, Zhongliang and Qian, Yifei and Lau, Chun Pong},
+               year={2025},
+               booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}
+}
+```
