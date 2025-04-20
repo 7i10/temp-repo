@@ -28,6 +28,7 @@ bash test.sh
 ## Purification pipeline
 ![more](asset/pipeline_r.png)
 
+All code run on NVIDIA L40 with cuda 12.4
 
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
