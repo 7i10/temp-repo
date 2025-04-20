@@ -6,7 +6,7 @@ Official Implementation for CVPR 2025 paper Instant Adversarial Purification wit
 ![teaser](asset/teaser.png)
 
 
-**Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5 with special LCM LoRA objective.
+**Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5 with a special LCM LoRA objective.
 ## Training objective
 ![obj](asset/pipeline_l.png)
 
