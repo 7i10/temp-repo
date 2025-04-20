@@ -12,13 +12,13 @@ Official Implementation for CVPR 2025 paper Instant Adversarial Purification wit
 Once you have prepared the data, you can train the model using the following command. 
 
 ```
-CUDA_VISIBLE_DEVICES=0 bash train_lora.sh
+bash train_lora.sh
 ```
 ---
 ## Evaluation
 
 ```
-CUDA_VISIBLE_DEVICES=0 bash test.sh
+bash test.sh
 ```
 ---
 ## Pipeline
