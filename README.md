@@ -6,6 +6,8 @@ Official Implementation for CVPR 2025 paper Instant Adversarial Purification wit
 
 
 **Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5.
+## Training objective
+![more](assert/pipeline_l.png)
 
 ---
 ## Train
@@ -21,8 +23,10 @@ bash train_lora.sh
 bash test.sh
 ```
 ---
-## Pipeline
-![more](asset/Pipeline.png)
+## Purification pipeline
+![more](asset/pipeline_r.png)
+
+
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
