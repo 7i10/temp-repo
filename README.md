@@ -2,7 +2,7 @@
 ## [Paper (ArXiv)](https://arxiv.org/abs/2408.17064) 
 
 Official Implementation for CVPR 2025 paper Instant Adversarial Purification with Adversarial Consistency Distillation.
-![teaser](asset/teaser.pdf)
+![teaser](asset/teaser.png)
 
 
 **Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5.
@@ -22,7 +22,7 @@ CUDA_VISIBLE_DEVICES=0 bash test.sh
 ```
 ---
 ## Pipeline
-![more](asset/Pipeline.pdf)
+![more](asset/Pipeline.png)
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
