@@ -11,7 +11,7 @@ import torch
 # set this environment variable to the location of your imagenet directory if you want to read ImageNet data.
 # make sure your val directory is preprocessed to look like the train directory, e.g. by running this script
 # https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh
-os.environ['IMAGENET_LOC_ENV'] = "./image_net" # imagenet
+os.environ['IMAGENET_LOC_ENV'] = "./image_net"
 os.environ['celebA'] = "./datasets/CelebA-HQ"
 
 
@@ -46,13 +46,10 @@ def get_num_classes(dataset: str):
         return 1000
 
 
-def get_normalize_layer(dataset: str, diff=None, vit=None) -> torch.nn.Module:
+def get_normalize_layer(dataset: str, diff=None) -> torch.nn.Module:
     """Return the dataset's normalization layer"""
     if diff:
         return NormalizeLayer(_DIFF_MEAN, _DIFF_STD)
-    if vit:
-        # FOR VIT AND BEIT-L
-        return NormalizeLayer(_IMAGENET_MEAN, _IMAGENET_STDDEV)
 
     if dataset == "imagenet":
         return NormalizeLayer(_IMAGENET_MEAN, _IMAGENET_STDDEV)
