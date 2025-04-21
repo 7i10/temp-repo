@@ -105,15 +105,6 @@ def parse_args():
         type=int,
         default=224
     )
-    # parser.add_argument(
-    #     "--resolution",
-    #     type=int,
-    #     default=512,
-    #     help=(
-    #         "The resolution for input images, all the images in the train/validation dataset will be resized to this"
-    #         " resolution"
-    #     ),
-    # )
     parser.add_argument(
         "--max_train_samples",
         type=int,
@@ -319,13 +310,6 @@ def parse_args():
     )
     # ----Distributed Training----
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
-    # ----------Validation Arguments----------
-    # parser.add_argument(
-    #     "--validation_steps",
-    #     type=int,
-    #     default=200,
-    #     help="Run validation every X steps.",
-    # )
     # ----------Accelerate Arguments----------
     parser.add_argument(
         "--tracker_project_name",
