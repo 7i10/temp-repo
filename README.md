@@ -1,5 +1,5 @@
 # Instant Adversarial Purification with Adversarial Consistency Distillation (CVPR2025)
-## [Paper (ArXiv)](https://arxiv.org/abs/2408.17064) 
+## [Paper (arXiv)](https://arxiv.org/abs/2408.17064) 
 
 Official Implementation for CVPR 2025 paper Instant Adversarial Purification with Adversarial Consistency Distillation.
 
