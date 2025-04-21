@@ -79,15 +79,6 @@ def get_module_kohya_state_dict(module, prefix: str, dtype: torch.dtype, adapter
 
     return kohya_ss_state_dict
 
-def get_depth_map(image, depth_estimator):
-    image = depth_estimator(image)["depth"]
-    image = np.array(image)
-    image = image[:, :, None]
-    image = np.concatenate([image, image, image], axis=2)
-    detected_map = torch.from_numpy(image).float() / 255.0
-    depth_map = detected_map.permute(2, 0, 1)
-    return depth_map
-
 class Denoised_Classifier(torch.nn.Module):
     def __init__(self, classifier, pipe, device, diffusion, model, t):
         super().__init__()
@@ -285,7 +276,7 @@ def Global(classifier, device, respace, t, args, eps=16, iter=10, name='attack_g
 
     mp(save_path + "/visualization/")
     seed_everything(args.seed)
-    classifier = get_archs(classifier, 'imagenet')        #imagenet
+    classifier = get_archs(classifier, 'imagenet')  
     classifier = classifier.to(device)
     classifier.eval()
 
@@ -373,7 +364,6 @@ def Global(classifier, device, respace, t, args, eps=16, iter=10, name='attack_g
         elif version == 'v2':
             x_adv = generate_x_adv_denoised_v2(x, y, diffusion, model, classifier, pgd_conf, device, t, pipe)     #diff-pgd
 
-        #print(x_adv)
         attack_fail_rate += (y == classifier(x_adv).argmax(1)).sum().item()
 
         with (torch.no_grad()):
