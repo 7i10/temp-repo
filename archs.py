@@ -23,11 +23,8 @@ def get_archs(arch, dataset='imagenet'):
 
         elif arch == 'convnext_b':
             model = torchvision.models.convnext_base(weights='DEFAULT')
-            
-        elif arch == 'beit':
-            model = BeitForImageClassification.from_pretrained('microsoft/beit-large-patch16-224')
     
-    normalize_layer = get_normalize_layer(dataset, vit=True if ("vit" in arch or 'beit' in arch) else False)
+    normalize_layer = get_normalize_layer(dataset)
     
     return torch.nn.Sequential(normalize_layer, model)
 
