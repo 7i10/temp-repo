@@ -19,10 +19,10 @@ def get_archs(arch, dataset='imagenet'):
             model = torchvision.models.vit_b_16(weights='DEFAULT')
 
         elif arch == 'swin_b':
-            model = torchvision.models.swin_b(pretrained=True)
+            model = torchvision.models.swin_b(weights='DEFAULT')
 
         elif arch == 'convnext_b':
-            model = torchvision.models.convnext_base(pretrained=True)
+            model = torchvision.models.convnext_base(weights='DEFAULT')
             
         elif arch == 'beit':
             model = BeitForImageClassification.from_pretrained('microsoft/beit-large-patch16-224')
