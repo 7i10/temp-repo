@@ -52,7 +52,7 @@ def get_normalize_layer(dataset: str, diff=None, vit=None) -> torch.nn.Module:
         return NormalizeLayer(_DIFF_MEAN, _DIFF_STD)
     if vit:
         # FOR VIT AND BEIT-L
-        return NormalizeLayer(_CIFAR10_MEAN_VIT, _CIFAR10_STDDEV_VIT)
+        return NormalizeLayer(_IMAGENET_MEAN, _IMAGENET_STDDEV)
 
     if dataset == "imagenet":
         return NormalizeLayer(_IMAGENET_MEAN, _IMAGENET_STDDEV)
@@ -61,17 +61,12 @@ def get_input_center_layer(dataset: str) -> torch.nn.Module:
     """Return the dataset's Input Centering layer"""
     if dataset == "imagenet":
         return InputCenterLayer(_IMAGENET_MEAN)
-    elif dataset == "cifar10":
-        return InputCenterLayer(_CIFAR10_MEAN)
-
 
 _IMAGENET_MEAN = [0.485, 0.456, 0.406]
 _IMAGENET_STDDEV = [0.229, 0.224, 0.225]
 
 _DIFF_MEAN = [0, 0, 0]
 _DIFF_STD = [1, 1, 1]
-
-
 
 def _celebA(split: str) -> Dataset:
     return datasets.ImageFolder(os.environ['celebahq'] ,transform=transforms.Compose([
