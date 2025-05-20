@@ -1,3 +1,5 @@
+# modify on top of https://github.com/xavihart/Diff-PGD
+
 from guided_diffusion.script_util import (
                 NUM_CLASSES,
                 model_and_diffusion_defaults,
