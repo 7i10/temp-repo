@@ -1,3 +1,5 @@
+# modify on top of https://github.com/xavihart/Diff-PGD
+
 from PIL import ImageFilter
 from load_dm import get_imagenet_dm_conf
 from dataset import get_dataset
