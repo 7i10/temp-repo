@@ -33,10 +33,12 @@ All code run on NVIDIA L40 with cuda 12.4
 ## Citation
 Consider cite us if you find our paper is useful in your research :).
 ```
-@inproceedings{lei2025instant,
-               title={Instant adversarial purification with adversarial consistency distillation},
-               author={Lei, Chun Tong and Yam, Hon Ming and Guo, Zhongliang and Qian, Yifei and Lau, Chun Pong},
-               year={2025},
-               booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}
+@InProceedings{Lei_2025_CVPR,
+    author    = {Lei, Chun Tong and Yam, Hon Ming and Guo, Zhongliang and Qian, Yifei and Lau, Chun Pong},
+    title     = {Instant Adversarial Purification with Adversarial Consistency Distillation},
+    booktitle = {Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR)},
+    month     = {June},
+    year      = {2025},
+    pages     = {24331-24340}
 }
 ```
