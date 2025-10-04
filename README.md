@@ -1,44 +1,41 @@
-# Instant Adversarial Purification with Adversarial Consistency Distillation (CVPR2025)
-## [Paper (arXiv)](https://arxiv.org/abs/2408.17064) 
+# temp-repo
 
-Official Implementation for CVPR 2025 paper Instant Adversarial Purification with Adversarial Consistency Distillation.
-
-![teaser](asset/teaser.png)
-
-
-**Stable Diffusion:** Our model is developed by distilling Stable Diffusion v1.5 with a special LCM LoRA objective.
-## Training objective
-![obj](asset/pipeline_l.png)
+本リポジトリは [InstantPure (オリジナルリポジトリ)](https://github.com/antony090/InstantPure) のコードを引用・改変したものです。
+元コードは Apache License 2.0 のもとで公開されています。
+本リポジトリの改変部分・追加部分についても Apache License 2.0 に従います。
 
 ---
-## Train
-Once you have prepared the data, you can train the model using the following command. 
+
+## 著作権・ライセンス
 
 ```
-bash train_lora.sh
+# Copyright 2025 The HuggingFace Inc. team. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# This code is modified from InstantPure (https://github.com/antony090/InstantPure),
+# which is modified on top of latent-consistency-model (https://github.com/luosiallen/latent-consistency-model).
 ```
+
 ---
-## Evaluation
-Evaluation code for ImageNet is provided.
 
-```
-bash test.sh
-```
+## 使い方・改変内容
+
+- ここに自分の改変点や使い方を自由に記載します。
+
 ---
-## Purification pipeline
-![more](asset/pipeline_r.png)
 
-All code run on NVIDIA L40 with cuda 12.4
+## オリジナル論文・引用
 
-## Citation
-Consider cite us if you find our paper is useful in your research :).
-```
-@InProceedings{Lei_2025_CVPR,
-    author    = {Lei, Chun Tong and Yam, Hon Ming and Guo, Zhongliang and Qian, Yifei and Lau, Chun Pong},
-    title     = {Instant Adversarial Purification with Adversarial Consistency Distillation},
-    booktitle = {Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR)},
-    month     = {June},
-    year      = {2025},
-    pages     = {24331-24340}
-}
-```
+- [arXiv:2408.17064](https://arxiv.org/abs/2408.17064)
+- 論文引用例やオリジナル README の内容も必要に応じて記載

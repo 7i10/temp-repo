@@ -12,8 +12,10 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
+# limitations under the License.
 
-# We modify on top of https://github.com/luosiallen/latent-consistency-model
+# This code is modified from InstantPure (https://github.com/antony090/InstantPure),
+# which is modified on top of latent-consistency-model (https://github.com/luosiallen/latent-consistency-model).
 
 import os
 import math
