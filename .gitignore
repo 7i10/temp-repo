@@ -1,2 +1,45 @@
 data/
 docs/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+*.pkl
+*.pickle
+
+# Jupyter/IPython
+*.ipynb_checkpoints
+
+# VSCode
+.vscode/
+
+# Mac
+.DS_Store
+
+# Virtualenv/conda
+venv/
+.venv/
+env/
+.env/
+.mypy_cache/
+.pytest_cache/
+.cache/
+
+# Logs
+*.log
+*.out
+*.err
+
+# Checkpoints/weights
+*.ckpt
+*.pth
+*.pt
+*.h5
+*.onnx
+
+# DeepLake cache
+.deeplake_cache/
