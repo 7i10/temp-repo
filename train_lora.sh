@@ -16,7 +16,6 @@ accelerate launch train_lora.py \
     --train_batch_size=16 \
     --gradient_checkpointing --enable_xformers_memory_efficient_attention \
     --gradient_accumulation_steps=1 \
-    --use_8bit_adam \
     --lr_scheduler="constant_with_warmup" \
     --resume_from_checkpoint=latest \
     --report_to="tensorboard" \
