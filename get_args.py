@@ -17,7 +17,7 @@ def parse_args():
         type=str,
         default=None,
         help="Path to pretrained VAE model with better numerical stability."
-             "More details: https://github.com/huggingface/diffusers/pull/4038.",
+        "More details: https://github.com/huggingface/diffusers/pull/4038.",
     )
     parser.add_argument(
         "--teacher_revision",
@@ -54,7 +54,9 @@ def parse_args():
         default=None,
         help="The directory where the downloaded models and datasets will be stored.",
     )
-    parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
+    parser.add_argument(
+        "--seed", type=int, default=None, help="A seed for reproducible training."
+    )
     # ----Logging----
     parser.add_argument(
         "--logging_dir",
@@ -100,11 +102,7 @@ def parse_args():
         ),
     )
     # ----Image Processing----
-    parser.add_argument(
-        "--classifier_resolution",
-        type=int,
-        default=224
-    )
+    parser.add_argument("--classifier_resolution", type=int, default=224)
     parser.add_argument(
         "--max_train_samples",
         type=int,
@@ -113,6 +111,18 @@ def parse_args():
             "For debugging purposes or quicker training, truncate the number of training examples to this "
             "value if set."
         ),
+    )
+    # ----DeepLake Streaming Arguments----
+    parser.add_argument(
+        "--use_deeplake",
+        action="store_true",
+        help="Use DeepLake for streaming ImageNet data instead of local files. Saves storage space and setup time.",
+    )
+    parser.add_argument(
+        "--deeplake_subset",
+        type=int,
+        default=40000,
+        help="Number of samples to use from DeepLake ImageNet dataset (default: 40000).",
     )
     # ----Dataloader----
     parser.add_argument(
@@ -125,7 +135,10 @@ def parse_args():
     )
     # ----Batch Size and Training Steps----
     parser.add_argument(
-        "--train_batch_size", type=int, default=16, help="Batch size (per device) for the training dataloader."
+        "--train_batch_size",
+        type=int,
+        default=16,
+        help="Batch size (per device) for the training dataloader.",
     )
     parser.add_argument("--num_train_epochs", type=int, default=100)
     parser.add_argument(
@@ -158,7 +171,10 @@ def parse_args():
         ),
     )
     parser.add_argument(
-        "--lr_warmup_steps", type=int, default=500, help="Number of steps for the warmup in the lr scheduler."
+        "--lr_warmup_steps",
+        type=int,
+        default=500,
+        help="Number of steps for the warmup in the lr scheduler.",
     )
     parser.add_argument(
         "--gradient_accumulation_steps",
@@ -168,13 +184,34 @@ def parse_args():
     )
     # ----Optimizer (Adam)----
     parser.add_argument(
-        "--use_8bit_adam", action="store_true", help="Whether or not to use 8-bit Adam from bitsandbytes."
+        "--use_8bit_adam",
+        action="store_true",
+        help="Whether or not to use 8-bit Adam from bitsandbytes.",
     )
-    parser.add_argument("--adam_beta1", type=float, default=0.9, help="The beta1 parameter for the Adam optimizer.")
-    parser.add_argument("--adam_beta2", type=float, default=0.999, help="The beta2 parameter for the Adam optimizer.")
-    parser.add_argument("--adam_weight_decay", type=float, default=1e-2, help="Weight decay to use.")
-    parser.add_argument("--adam_epsilon", type=float, default=1e-08, help="Epsilon value for the Adam optimizer")
-    parser.add_argument("--max_grad_norm", default=1.0, type=float, help="Max gradient norm.")
+    parser.add_argument(
+        "--adam_beta1",
+        type=float,
+        default=0.9,
+        help="The beta1 parameter for the Adam optimizer.",
+    )
+    parser.add_argument(
+        "--adam_beta2",
+        type=float,
+        default=0.999,
+        help="The beta2 parameter for the Adam optimizer.",
+    )
+    parser.add_argument(
+        "--adam_weight_decay", type=float, default=1e-2, help="Weight decay to use."
+    )
+    parser.add_argument(
+        "--adam_epsilon",
+        type=float,
+        default=1e-08,
+        help="Epsilon value for the Adam optimizer",
+    )
+    parser.add_argument(
+        "--max_grad_norm", default=1.0, type=float, help="Max gradient norm."
+    )
     # ----Diffusion Training Arguments----
     parser.add_argument(
         "--proportion_empty_prompts",
@@ -301,7 +338,9 @@ def parse_args():
     )
     # ----Training Optimizations----
     parser.add_argument(
-        "--enable_xformers_memory_efficient_attention", action="store_true", help="Whether or not to use xformers."
+        "--enable_xformers_memory_efficient_attention",
+        action="store_true",
+        help="Whether or not to use xformers.",
     )
     parser.add_argument(
         "--gradient_checkpointing",
@@ -309,7 +348,12 @@ def parse_args():
         help="Whether or not to use gradient checkpointing to save memory at the expense of slower backward pass.",
     )
     # ----Distributed Training----
-    parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
+    parser.add_argument(
+        "--local_rank",
+        type=int,
+        default=-1,
+        help="For distributed training: local_rank",
+    )
     # ----------Accelerate Arguments----------
     parser.add_argument(
         "--tracker_project_name",
