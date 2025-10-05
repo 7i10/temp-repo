@@ -1,5 +1,5 @@
-accelerate==0.29.3
-advertorch==0.2.3
+accelerate
+torchattacks
 advex_uar==0.0.6.dev0
 git+https://github.com/fra31/auto-attack.git
 bitsandbytes==0.42.0
@@ -13,7 +13,7 @@ numpy==1.24.4
 opencv_python==4.9.0.80
 packaging==25.0
 pandas==1.5.3
-peft==0.10.0
+peft
 Pillow==11.2.1
 safetensors==0.5.3
 torch==2.4.0
@@ -21,5 +21,5 @@ torcheval==0.0.7
 torchmetrics==0.6.0
 torchvision==0.19.0
 tqdm>=4.62.1
-transformers==4.40.1
+transformers
 xformers==0.0.27.post2

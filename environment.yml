@@ -1,4 +1,4 @@
-name: instantpure
+name: research
 channels:
   - defaults
   - conda-forge
@@ -13,22 +13,22 @@ dependencies:
   - pytorch::pytorch=2.4.0
   - pytorch::torchvision=0.19.0
   - pip:
-      - accelerate==0.29.3
-      - advertorch==0.2.3
+      - accelerate
+      - torchattacks
       - advex_uar==0.0.6.dev0
       - git+https://github.com/fra31/auto-attack.git
       - bitsandbytes==0.42.0
       - colorama==0.4.6
       - datasets==2.19.1
       - deeplake
-      - diffusers==0.30.3
+      - git+https://github.com/huggingface/diffusers.git
       - lpips==0.1.4
       - packaging==25.0
-      - peft==0.10.0
+      - peft
       - Pillow==11.2.1
       - safetensors==0.5.3
       - torcheval==0.0.7
       - torchmetrics==0.6.0
       - tqdm>=4.62.1
-      - transformers==4.40.1
+      - transformers
       - xformers==0.0.27.post2
