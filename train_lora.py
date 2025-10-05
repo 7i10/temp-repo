@@ -39,7 +39,7 @@ from ddim_solver import DDIMSolver
 from dataset import get_dataset
 from torch.utils.data import DataLoader, Subset
 from accelerate.logging import get_logger
-from advertorch.attacks import LinfPGDAttack
+import torchattacks
 from diffusers.utils import check_min_version
 from decode_classifier import DecodeClassifier
 from diffusers.optimization import get_scheduler
@@ -47,7 +47,12 @@ from transformers import AutoTokenizer, CLIPTextModel
 from accelerate.utils import ProjectConfiguration, set_seed
 from diffusers.utils.import_utils import is_xformers_available
 from peft import LoraConfig, get_peft_model, get_peft_model_state_dict
-from diffusers import AutoencoderKL, DDPMScheduler, StableDiffusionPipeline, UNet2DConditionModel
+from diffusers import (
+    AutoencoderKL,
+    DDPMScheduler,
+    StableDiffusionPipeline,
+    UNet2DConditionModel,
+)
 
 MAX_SEQ_LENGTH = 77
 check_min_version("0.31.0.dev0")
@@ -57,7 +62,9 @@ logger = get_logger(__name__)
 def main(args):
     logging_dir = Path(args.output_dir, args.logging_dir)
 
-    accelerator_project_config = ProjectConfiguration(project_dir=args.output_dir, logging_dir=str(logging_dir))
+    accelerator_project_config = ProjectConfiguration(
+        project_dir=args.output_dir, logging_dir=str(logging_dir)
+    )
 
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
@@ -95,7 +102,9 @@ def main(args):
 
     # 1. Create the noise scheduler and the desired noise schedule.
     noise_scheduler = DDPMScheduler.from_pretrained(
-        args.pretrained_teacher_model, subfolder="scheduler", revision=args.teacher_revision
+        args.pretrained_teacher_model,
+        subfolder="scheduler",
+        revision=args.teacher_revision,
     )
 
     # DDPMScheduler calculates the alpha and sigma noise schedules (based on the alpha bars) for us
@@ -110,13 +119,18 @@ def main(args):
 
     # 2. Load tokenizers from SD 1.X/2.X checkpoint.
     tokenizer = AutoTokenizer.from_pretrained(
-        args.pretrained_teacher_model, subfolder="tokenizer", revision=args.teacher_revision, use_fast=False
+        args.pretrained_teacher_model,
+        subfolder="tokenizer",
+        revision=args.teacher_revision,
+        use_fast=False,
     )
 
     # 3. Load text encoders from SD 1.X/2.X checkpoint.
     # import correct text encoder classes
     text_encoder = CLIPTextModel.from_pretrained(
-        args.pretrained_teacher_model, subfolder="text_encoder", revision=args.teacher_revision
+        args.pretrained_teacher_model,
+        subfolder="text_encoder",
+        revision=args.teacher_revision,
     )
 
     # 4. Load VAE from SD 1.X/2.X checkpoint
@@ -155,7 +169,9 @@ def main(args):
 
     # 8. Add LoRA to the student U-Net, the optimizer will update only the LoRA projection matrix.
     if args.lora_target_modules is not None:
-        lora_target_modules = [module_key.strip() for module_key in args.lora_target_modules.split(",")]
+        lora_target_modules = [
+            module_key.strip() for module_key in args.lora_target_modules.split(",")
+        ]
     else:
         lora_target_modules = [
             "to_q",
@@ -215,8 +231,12 @@ def main(args):
         def save_model_hook(models, weights, output_dir):
             if accelerator.is_main_process:
                 unet_ = accelerator.unwrap_model(unet)
-                lora_state_dict_ = get_peft_model_state_dict(unet_, adapter_name="default")
-                StableDiffusionPipeline.save_lora_weights(os.path.join(output_dir, "unet_lora"), lora_state_dict_)
+                lora_state_dict_ = get_peft_model_state_dict(
+                    unet_, adapter_name="default"
+                )
+                StableDiffusionPipeline.save_lora_weights(
+                    os.path.join(output_dir, "unet_lora"), lora_state_dict_
+                )
                 # save weights in peft format to be able to load them back
                 unet_.save_pretrained(output_dir)
 
@@ -251,7 +271,9 @@ def main(args):
             unet.enable_xformers_memory_efficient_attention()
             teacher_unet.enable_xformers_memory_efficient_attention()
         else:
-            raise ValueError("xformers is not available. Make sure it is installed correctly")
+            raise ValueError(
+                "xformers is not available. Make sure it is installed correctly"
+            )
 
     # Enable TF32 for faster training on Ampere GPUs,
     # cf. Https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices
@@ -286,19 +308,81 @@ def main(args):
     # 13. Dataset creation and data processing
     # Here, we compute not just the text embeddings but also the additional embeddings
     # needed for the SD XL UNet to operate.
-    dataset = get_dataset("imagenet_sd", split="train")
-    if args.max_train_samples is not None:
-        random_indices = random.sample(range(len(dataset)), args.max_train_samples)
-        dataset = Subset(dataset, random_indices)
-    train_dataloader = DataLoader(dataset,
-                                  batch_size=args.train_batch_size,
-                                  shuffle=True,
-                                  num_workers=args.dataloader_num_workers)
+
+    if args.use_deeplake:
+        # DeepLakeを使用する場合：ストリーミングでデータを取得
+        print(f"Using DeepLake streaming with {args.deeplake_subset} samples")
+        deeplake_dataloader = get_dataset(
+            "imagenet_sd",
+            split="train",
+            use_deeplake=True,
+            deeplake_subset=args.deeplake_subset,
+        )
+
+        # DeepLake DataLoaderを学習用バッチサイズでラップ
+        class BatchDataLoader:
+            def __init__(self, dataloader, batch_size):
+                self.dataloader = dataloader
+                self.batch_size = batch_size
+
+            def __iter__(self):
+                batch_images = []
+                batch_labels = []
+
+                for data in self.dataloader:
+                    # DeepLakeからのデータ取得方法に応じて調整
+                    if isinstance(data, dict):
+                        images = data["images"]
+                        labels = data["labels"]
+                    else:
+                        images, labels = data
+
+                    # バッチに追加
+                    if images.dim() == 3:  # シングル画像の場合
+                        images = images.unsqueeze(0)
+                    if labels.dim() == 0:  # シングルラベルの場合
+                        labels = labels.unsqueeze(0)
+
+                    batch_images.append(images)
+                    batch_labels.append(labels)
+
+                    if len(batch_images) >= self.batch_size:
+                        yield (
+                            torch.cat(batch_images, dim=0),
+                            torch.cat(batch_labels, dim=0),
+                        )
+                        batch_images = []
+                        batch_labels = []
+
+                # 残りのバッチ
+                if batch_images:
+                    yield torch.cat(batch_images, dim=0), torch.cat(batch_labels, dim=0)
+
+            def __len__(self):
+                return (args.deeplake_subset + self.batch_size - 1) // self.batch_size
+
+        train_dataloader = BatchDataLoader(deeplake_dataloader, args.train_batch_size)
+
+    else:
+        # 従来の方法：ローカルファイルから読み込み
+        print("Using local ImageNet files")
+        dataset = get_dataset("imagenet_sd", split="train")
+        if args.max_train_samples is not None:
+            random_indices = random.sample(range(len(dataset)), args.max_train_samples)
+            dataset = Subset(dataset, random_indices)
+        train_dataloader = DataLoader(
+            dataset,
+            batch_size=args.train_batch_size,
+            shuffle=True,
+            num_workers=args.dataloader_num_workers,
+        )
 
     # 14. LR Scheduler creation
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
-    num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
+    num_update_steps_per_epoch = math.ceil(
+        len(train_dataloader) / args.gradient_accumulation_steps
+    )
     if args.max_train_steps is None:
         args.max_train_steps = args.num_train_epochs * num_update_steps_per_epoch
         overrode_max_train_steps = True
@@ -315,7 +399,9 @@ def main(args):
     unet, optimizer, lr_scheduler = accelerator.prepare(unet, optimizer, lr_scheduler)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
-    num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
+    num_update_steps_per_epoch = math.ceil(
+        len(train_dataloader) / args.gradient_accumulation_steps
+    )
     if overrode_max_train_steps:
         args.max_train_steps = args.num_train_epochs * num_update_steps_per_epoch
     # Afterward, we recalculate our number of training epochs
@@ -328,7 +414,10 @@ def main(args):
         accelerator.init_trackers(args.tracker_project_name, config=tracker_config)
 
     uncond_input_ids = tokenizer(
-        [""] * args.train_batch_size, return_tensors="pt", padding="max_length", max_length=77
+        [""] * args.train_batch_size,
+        return_tensors="pt",
+        padding="max_length",
+        max_length=77,
     ).input_ids.to(accelerator.device)
     uncond_prompt_embeds = text_encoder(uncond_input_ids)[0]
 
@@ -338,13 +427,19 @@ def main(args):
         autocast_ctx = torch.autocast(accelerator.device.type)
 
     # 16. Train!
-    total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps
+    total_batch_size = (
+        args.train_batch_size
+        * accelerator.num_processes
+        * args.gradient_accumulation_steps
+    )
 
     logger.info("***** Running training *****")
     logger.info(f"  Num batches each epoch = {len(train_dataloader)}")
     logger.info(f"  Num Epochs = {args.num_train_epochs}")
     logger.info(f"  Instantaneous batch size per device = {args.train_batch_size}")
-    logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
+    logger.info(
+        f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}"
+    )
     logger.info(f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
     logger.info(f"  Total optimization steps = {args.max_train_steps}")
     global_step = 0
@@ -386,19 +481,21 @@ def main(args):
     )
 
     # prepare classifier:
-    classifier = get_archs(args.surrogate_model, 'imagenet')
+    classifier = get_archs(args.surrogate_model, "imagenet")
     classifier = classifier.to(accelerator.device).eval()
-    decode_classifier = DecodeClassifier(classifier=classifier, vae=vae, scaling_factor=vae.config.scaling_factor,
-                                         size=(args.classifier_resolution, args.classifier_resolution))
-    adversary = LinfPGDAttack(decode_classifier,
-                              loss_fn=torch.nn.CrossEntropyLoss(reduction="mean"),
-                              eps=args.eps,
-                              nb_iter=args.attack_iter,
-                              eps_iter=args.eps_iter,
-                              clip_min=None,
-                              clip_max=None,
-                              rand_init=False,
-                              targeted=False)
+    decode_classifier = DecodeClassifier(
+        classifier=classifier,
+        vae=vae,
+        scaling_factor=vae.config.scaling_factor,
+        size=(args.classifier_resolution, args.classifier_resolution),
+    )
+    adversary = torchattacks.PGD(
+        decode_classifier,
+        eps=args.eps,
+        alpha=args.eps_iter,
+        steps=args.attack_iter,
+        random_start=False,
+    )
     for epoch in range(first_epoch, args.num_train_epochs):
         for step, (image, label) in enumerate(train_dataloader):
             with accelerator.accumulate(unet):
@@ -411,7 +508,11 @@ def main(args):
                 # encode pixel values with batch size of at most args.vae_encode_batch_size
                 latents = []
                 for i in range(0, pixel_values.shape[0], args.vae_encode_batch_size):
-                    latents.append(vae.encode(pixel_values[i: i + args.vae_encode_batch_size]).latent_dist.sample())
+                    latents.append(
+                        vae.encode(
+                            pixel_values[i : i + args.vae_encode_batch_size]
+                        ).latent_dist.sample()
+                    )
                 latents = torch.cat(latents, dim=0)
 
                 latents = latents * vae.config.scaling_factor
@@ -421,17 +522,26 @@ def main(args):
 
                 # 2. Sample a random timestep for each image t_n from the ODE solver timesteps without bias.
                 # For the DDIM solver, the timestep schedule is [T - 1, T - k - 1, T - 2 * k - 1, ...]
-                topk = noise_scheduler.config.num_train_timesteps // args.num_ddim_timesteps
-                index = torch.randint(0, args.num_ddim_timesteps // args.N, (bsz,), device=latents.device).long()
+                topk = (
+                    noise_scheduler.config.num_train_timesteps
+                    // args.num_ddim_timesteps
+                )
+                index = torch.randint(
+                    0, args.num_ddim_timesteps // args.N, (bsz,), device=latents.device
+                ).long()
                 start_timesteps = solver.ddim_timesteps[index]
                 timesteps = start_timesteps - topk
-                timesteps = torch.where(timesteps < 0, torch.zeros_like(timesteps), timesteps)
+                timesteps = torch.where(
+                    timesteps < 0, torch.zeros_like(timesteps), timesteps
+                )
 
                 # 3. Get boundary scaling for start_timesteps and (end) timesteps.
                 c_skip_start, c_out_start = scalings_for_boundary_conditions(
                     start_timesteps, timestep_scaling=args.timestep_scaling_factor
                 )
-                c_skip_start, c_out_start = [append_dims(x, latents.ndim) for x in [c_skip_start, c_out_start]]
+                c_skip_start, c_out_start = [
+                    append_dims(x, latents.ndim) for x in [c_skip_start, c_out_start]
+                ]
                 c_skip, c_out = scalings_for_boundary_conditions(
                     timesteps, timestep_scaling=args.timestep_scaling_factor
                 )
@@ -440,7 +550,9 @@ def main(args):
                 # 4. Sample noise from the prior and add it to the latents according to the noise magnitude at each
                 # timestep (this is the forward diffusion process) [z_{t_{n + k}} in Algorithm 1]
                 noise = torch.randn_like(latents) + adv_latents - latents
-                noisy_model_input = noise_scheduler.add_noise(latents, noise, start_timesteps)
+                noisy_model_input = noise_scheduler.add_noise(
+                    latents, noise, start_timesteps
+                )
 
                 # 7. Get online LCM prediction on z_{t_{n + k}} (noisy_model_input), w, c, t_{n + k} (start_timesteps)
                 noise_pred = unet(
@@ -518,13 +630,23 @@ def main(args):
 
                 # 10. Calculate loss
                 if args.loss_type == "l2":
-                    loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean") + args.lmd * F.mse_loss(
-                        model_pred.float(), latents.float(), reduction="mean")
+                    loss = F.mse_loss(
+                        model_pred.float(), target.float(), reduction="mean"
+                    ) + args.lmd * F.mse_loss(
+                        model_pred.float(), latents.float(), reduction="mean"
+                    )
                 elif args.loss_type == "huber":
                     loss = torch.mean(
-                        torch.sqrt((model_pred.float() - target.float()) ** 2 + args.huber_c ** 2) - args.huber_c
+                        torch.sqrt(
+                            (model_pred.float() - target.float()) ** 2 + args.huber_c**2
+                        )
+                        - args.huber_c
                     ) + args.lmd * torch.mean(
-                        torch.sqrt((model_pred.float() - latents.float()) ** 2 + args.huber_c ** 2) - args.huber_c
+                        torch.sqrt(
+                            (model_pred.float() - latents.float()) ** 2
+                            + args.huber_c**2
+                        )
+                        - args.huber_c
                     )
                 # 11. Backpropagation on the online student model (`unet`)
                 accelerator.backward(loss)
@@ -544,26 +666,38 @@ def main(args):
                         # _before_ saving state, check if this save would set us over the `checkpoints_total_limit`
                         if args.checkpoints_total_limit is not None:
                             checkpoints = os.listdir(args.output_dir)
-                            checkpoints = [d for d in checkpoints if d.startswith("checkpoint")]
-                            checkpoints = sorted(checkpoints, key=lambda x: int(x.split("-")[1]))
+                            checkpoints = [
+                                d for d in checkpoints if d.startswith("checkpoint")
+                            ]
+                            checkpoints = sorted(
+                                checkpoints, key=lambda x: int(x.split("-")[1])
+                            )
 
                             # before we save the new checkpoint, we need to have at _most_
                             # `checkpoints_total_limit - 1` checkpoints
                             if len(checkpoints) >= args.checkpoints_total_limit:
-                                num_to_remove = len(checkpoints) - args.checkpoints_total_limit + 1
+                                num_to_remove = (
+                                    len(checkpoints) - args.checkpoints_total_limit + 1
+                                )
                                 removing_checkpoints = checkpoints[0:num_to_remove]
 
                                 logger.info(
                                     f"{len(checkpoints)} checkpoints already exist, "
                                     f"removing {len(removing_checkpoints)} checkpoints"
                                 )
-                                logger.info(f"removing checkpoints: {', '.join(removing_checkpoints)}")
+                                logger.info(
+                                    f"removing checkpoints: {', '.join(removing_checkpoints)}"
+                                )
 
                                 for removing_checkpoint in removing_checkpoints:
-                                    removing_checkpoint = os.path.join(args.output_dir, removing_checkpoint)
+                                    removing_checkpoint = os.path.join(
+                                        args.output_dir, removing_checkpoint
+                                    )
                                     shutil.rmtree(removing_checkpoint)
 
-                        save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
+                        save_path = os.path.join(
+                            args.output_dir, f"checkpoint-{global_step}"
+                        )
                         accelerator.save_state(save_path)
                         logger.info(f"Saved state to {save_path}")
 
@@ -583,7 +717,9 @@ def main(args):
         unet = accelerator.unwrap_model(unet)
         unet.save_pretrained(args.output_dir)
         lora_state_dict = get_peft_model_state_dict(unet, adapter_name="default")
-        StableDiffusionPipeline.save_lora_weights(os.path.join(args.output_dir, "unet_lora"), lora_state_dict)
+        StableDiffusionPipeline.save_lora_weights(
+            os.path.join(args.output_dir, "unet_lora"), lora_state_dict
+        )
 
     accelerator.end_training()
 

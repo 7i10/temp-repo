@@ -20,4 +20,6 @@ accelerate launch train_lora.py \
     --lr_scheduler="constant_with_warmup" \
     --resume_from_checkpoint=latest \
     --report_to="tensorboard" \
-    --seed=3407
+    --seed=3407 \
+    --use_deeplake \
+    --deeplake_subset=40000
