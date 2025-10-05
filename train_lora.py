@@ -518,6 +518,13 @@ def main(args):
                 latents = latents * vae.config.scaling_factor
                 latents = latents.to(weight_dtype)
                 bsz = latents.shape[0]
+                
+                # ラベルの形状を修正（torchattacks用に1Dにする）
+                if label.dim() > 1:
+                    label = label.squeeze()
+                if label.dim() == 0:
+                    label = label.unsqueeze(0)
+
                 adv_latents = adversary(latents, label)
 
                 # 2. Sample a random timestep for each image t_n from the ODE solver timesteps without bias.
