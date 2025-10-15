@@ -12,28 +12,42 @@ import pickle
 import torch
 
 
+def _normalize_image_array(img_array):
+    """
+    画像配列の形状を正規化してRGB形式にする
+    
+    Args:
+        img_array: numpy array形式の画像データ
+        
+    Returns:
+        正規化された(H, W, 3)形状のnumpy array
+    """
+    # 形状をチェックして異常なデータを処理
+    if img_array.ndim == 3 and img_array.shape == (1, 1, 1):
+        # 1x1x1の場合は無効なデータなので、代替の黒い画像を作成
+        img_array = np.zeros((224, 224, 3), dtype=np.uint8)
+    elif img_array.ndim == 3 and img_array.shape[2] == 1:
+        # グレースケール画像をRGBに変換
+        img_array = np.repeat(img_array, 3, axis=2)
+    elif img_array.ndim == 2:
+        # 2Dグレースケールを3DのRGBに変換
+        img_array = np.stack([img_array, img_array, img_array], axis=2)
+    elif img_array.ndim == 3 and img_array.shape[2] > 3:
+        # チャンネル数が3より多い場合は最初の3チャンネルを使用
+        img_array = img_array[:, :, :3]
+    
+    # 有効な形状かチェック
+    if img_array.ndim != 3 or img_array.shape[2] != 3:
+        # 無効な場合は黒い画像を作成
+        img_array = np.zeros((224, 224, 3), dtype=np.uint8)
+    
+    return img_array.astype(np.uint8)
+
+
 def to_rgb(x):
     if isinstance(x, np.ndarray):
-        # 形状をチェックして異常なデータを処理
-        if x.ndim == 3 and x.shape == (1, 1, 1):
-            # 1x1x1の場合は無効なデータなので、代替の黒い画像を作成
-            x = np.zeros((224, 224, 3), dtype=np.uint8)
-        elif x.ndim == 3 and x.shape[2] == 1:
-            # グレースケール画像をRGBに変換
-            x = np.repeat(x, 3, axis=2)
-        elif x.ndim == 2:
-            # 2Dグレースケールを3DのRGBに変換
-            x = np.stack([x, x, x], axis=2)
-        elif x.ndim == 3 and x.shape[2] > 3:
-            # チャンネル数が3より多い場合は最初の3チャンネルを使用
-            x = x[:, :, :3]
-        
-        # 有効な形状かチェック
-        if x.ndim != 3 or x.shape[2] != 3:
-            # 無効な場合は黒い画像を作成
-            x = np.zeros((224, 224, 3), dtype=np.uint8)
-            
-        x = Image.fromarray(x.astype(np.uint8))
+        x = _normalize_image_array(x)
+        x = Image.fromarray(x)
     return x.convert("RGB")
 
 
@@ -56,20 +70,8 @@ class TransformDataset(torch.utils.data.Dataset):
             image = transforms.ToPILImage()(image)
         elif hasattr(image, "numpy"):
             img_array = image.numpy()
-            # 形状をチェック
-            if img_array.ndim == 3 and img_array.shape == (1, 1, 1):
-                img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-            elif img_array.ndim == 3 and img_array.shape[2] == 1:
-                img_array = np.repeat(img_array, 3, axis=2)
-            elif img_array.ndim == 2:
-                img_array = np.stack([img_array, img_array, img_array], axis=2)
-            elif img_array.ndim == 3 and img_array.shape[2] > 3:
-                img_array = img_array[:, :, :3]
-            
-            if img_array.ndim != 3 or img_array.shape[2] != 3:
-                img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-                
-            image = Image.fromarray(img_array.astype(np.uint8))
+            img_array = _normalize_image_array(img_array)
+            image = Image.fromarray(img_array)
 
         if self.transform:
             image = self.transform(image)
@@ -100,20 +102,8 @@ class TransformDatasetSD(torch.utils.data.Dataset):
             image = transforms.ToPILImage()(image)
         elif hasattr(image, "numpy"):
             img_array = image.numpy()
-            # 形状をチェック
-            if img_array.ndim == 3 and img_array.shape == (1, 1, 1):
-                img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-            elif img_array.ndim == 3 and img_array.shape[2] == 1:
-                img_array = np.repeat(img_array, 3, axis=2)
-            elif img_array.ndim == 2:
-                img_array = np.stack([img_array, img_array, img_array], axis=2)
-            elif img_array.ndim == 3 and img_array.shape[2] > 3:
-                img_array = img_array[:, :, :3]
-            
-            if img_array.ndim != 3 or img_array.shape[2] != 3:
-                img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-                
-            image = Image.fromarray(img_array.astype(np.uint8))
+            img_array = _normalize_image_array(img_array)
+            image = Image.fromarray(img_array)
 
         if self.transform:
             image = self.transform(image)
@@ -323,20 +313,8 @@ def _imagenet_deeplake(split: str, subset_size: int = 40000):
 
             def deeplake_transform(sample):
                 img_array = sample["images"].numpy()
-                # 形状をチェックして修正
-                if img_array.ndim == 3 and img_array.shape == (1, 1, 1):
-                    img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-                elif img_array.ndim == 3 and img_array.shape[2] == 1:
-                    img_array = np.repeat(img_array, 3, axis=2)
-                elif img_array.ndim == 2:
-                    img_array = np.stack([img_array, img_array, img_array], axis=2)
-                elif img_array.ndim == 3 and img_array.shape[2] > 3:
-                    img_array = img_array[:, :, :3]
-                
-                if img_array.ndim != 3 or img_array.shape[2] != 3:
-                    img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-                    
-                image = Image.fromarray(img_array.astype(np.uint8)).convert("RGB")
+                img_array = _normalize_image_array(img_array)
+                image = Image.fromarray(img_array).convert("RGB")
                 
                 if split == "train":
                     transform = transforms.Compose(
@@ -439,20 +417,8 @@ def _imagenet_deeplake_sd(split: str, subset_size: int = 40000):
 
             def deeplake_transform_sd(sample):
                 img_array = sample["images"].numpy()
-                # 形状をチェックして修正
-                if img_array.ndim == 3 and img_array.shape == (1, 1, 1):
-                    img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-                elif img_array.ndim == 3 and img_array.shape[2] == 1:
-                    img_array = np.repeat(img_array, 3, axis=2)
-                elif img_array.ndim == 2:
-                    img_array = np.stack([img_array, img_array, img_array], axis=2)
-                elif img_array.ndim == 3 and img_array.shape[2] > 3:
-                    img_array = img_array[:, :, :3]
-                
-                if img_array.ndim != 3 or img_array.shape[2] != 3:
-                    img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-                    
-                image = Image.fromarray(img_array.astype(np.uint8)).convert("RGB")
+                img_array = _normalize_image_array(img_array)
+                image = Image.fromarray(img_array).convert("RGB")
                 transform = transforms.Compose(
                     [
                         transforms.Resize(256),
