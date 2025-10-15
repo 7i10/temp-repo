@@ -1,0 +1,136 @@
+
+This project includes external dependencies:
+
+---
+
+Python
+Copyright (c) Python Software Foundation
+Licensed under the Python Software Foundation License
+https://www.python.org/
+
+NumPy
+Copyright (c) 2005-2023, NumPy Developers.
+Licensed under the BSD License.
+https://github.com/numpy/numpy
+
+Pandas
+Copyright (c) 2008-2023, the pandas development team
+Licensed under the BSD License.
+https://github.com/pandas-dev/pandas
+
+Matplotlib
+Copyright (c) 2012-2023 The Matplotlib development team
+Licensed under the Matplotlib License (PSF/BSD)
+https://github.com/matplotlib/matplotlib
+
+OpenCV
+Copyright (c) 2000-2023, Intel Corporation, and other contributors
+Licensed under the Apache-2.0 License.
+https://github.com/opencv/opencv
+
+PyTorch
+Copyright (c) 2016- Facebook, Inc (Adam Paszke)
+Licensed under the BSD-3-Clause License.
+https://github.com/pytorch/pytorch
+
+torchvision
+Copyright (c) 2017-present, Torch Contributors.
+Licensed under the BSD-3-Clause License.
+https://github.com/pytorch/vision
+
+transformers
+Copyright (c) 2018 The HuggingFace Inc. team.
+Licensed under the Apache-2.0 License.
+https://github.com/huggingface/transformers
+
+diffusers
+Copyright (c) 2022 The HuggingFace Team.
+Licensed under the Apache-2.0 License.
+https://github.com/huggingface/diffusers
+
+peft
+Copyright (c) 2023 Hugging Face, Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/huggingface/peft
+
+DeepLake
+Copyright (c) Activeloop AI Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/activeloopai/deeplake
+
+torchattacks
+Copyright (c) 2020-2023 Hoki Kim
+Licensed under the MIT License.
+https://github.com/Harry24k/adversarial-attacks-pytorch
+
+AutoAttack
+Copyright (c) 2020 Francesco Croce, Matthias Hein.
+Licensed under the MIT License.
+https://github.com/fra31/autoattack
+
+advex_uar
+Copyright (c) 2019-2020, Google LLC
+Licensed under the Apache-2.0 License.
+https://github.com/tensorflow/cleverhans/tree/master/cleverhans/attacks/advex_uar
+
+bitsandbytes
+Copyright (c) 2022 Tim Dettmers
+Licensed under the MIT License.
+https://github.com/TimDettmers/bitsandbytes
+
+colorama
+Copyright (c) 2010-2023 Jonathan Hartley
+Licensed under the BSD License.
+https://github.com/tartley/colorama
+
+datasets
+Copyright (c) 2020 Hugging Face Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/huggingface/datasets
+
+lpips
+Copyright (c) 2018-2023 Richard Zhang
+Licensed under the BSD License.
+https://github.com/richzhang/PerceptualSimilarity
+
+packaging
+Copyright (c) 2014-2023 The Packaging Authority
+Licensed under the Apache-2.0 License.
+https://github.com/pypa/packaging
+
+Pillow
+Copyright (c) 1995-2023 Alex Clark and Contributors
+Licensed under the HPND License.
+https://github.com/python-pillow/Pillow
+
+safetensors
+Copyright (c) 2022 Hugging Face, Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/huggingface/safetensors
+
+torcheval
+Copyright (c) 2022-present, Meta Platforms, Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/pytorch/torcheval
+
+torchmetrics
+Copyright (c) 2020-2023 PyTorch Lightning, Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/Lightning-AI/torchmetrics
+
+tqdm
+Copyright (c) 2015-2023 tqdm contributors
+Licensed under the MPL-2.0 License.
+https://github.com/tqdm/tqdm
+
+xformers
+Copyright (c) 2021-present, Meta Platforms, Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/facebookresearch/xformers
+
+accelerate
+Copyright (c) 2021 Hugging Face, Inc.
+Licensed under the Apache-2.0 License.
+https://github.com/huggingface/accelerate
+
+Copies of relevant licenses are included in this repository where required.
