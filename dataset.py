@@ -15,10 +15,10 @@ import torch
 def _normalize_image_array(img_array):
     """
     画像配列の形状を正規化してRGB形式にする
-    
+
     Args:
         img_array: numpy array形式の画像データ
-        
+
     Returns:
         正規化された(H, W, 3)形状のnumpy array
     """
@@ -35,12 +35,12 @@ def _normalize_image_array(img_array):
     elif img_array.ndim == 3 and img_array.shape[2] > 3:
         # チャンネル数が3より多い場合は最初の3チャンネルを使用
         img_array = img_array[:, :, :3]
-    
+
     # 有効な形状かチェック
     if img_array.ndim != 3 or img_array.shape[2] != 3:
         # 無効な場合は黒い画像を作成
         img_array = np.zeros((224, 224, 3), dtype=np.uint8)
-    
+
     return img_array.astype(np.uint8)
 
 
@@ -315,7 +315,7 @@ def _imagenet_deeplake(split: str, subset_size: int = 40000):
                 img_array = sample["images"].numpy()
                 img_array = _normalize_image_array(img_array)
                 image = Image.fromarray(img_array).convert("RGB")
-                
+
                 if split == "train":
                     transform = transforms.Compose(
                         [
