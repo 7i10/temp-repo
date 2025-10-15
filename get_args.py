@@ -8,7 +8,7 @@ def parse_args():
     parser.add_argument(
         "--pretrained_teacher_model",
         type=str,
-        default="sd-legacy/stable-diffusion-v1-5",
+        default="stable-diffusion-v1-5/stable-diffusion-v1-5",
         required=False,
         help="Path to pretrained LDM teacher model or model identifier from huggingface.co/models.",
     )
