@@ -40,7 +40,9 @@ from dame_recon.purifier import *
 from advex_uar.attacks.snow_attack import *
 from advex_uar.attacks.fog_attack import *
 from advex_uar.attacks.gabor_attack import *
-
+from dotenv import load_dotenv
+    
+load_dotenv()
 
 def parse_args():
     parser = argparse.ArgumentParser(
