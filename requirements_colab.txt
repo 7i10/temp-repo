@@ -1,0 +1,41 @@
+# Colab セットアップ用 requirements.txt
+# CUDA 12.4 + PyTorch 2.4.0 対応
+
+# コア ML フレームワーク
+# PyTorch は --index-url で別途インストール
+transformers>=4.36.0
+peft>=0.7.0
+accelerate>=0.25.0
+diffusers>=0.24.0
+
+# データセット・ストレージ
+datasets>=2.19.0
+deeplake>=3.8.0
+
+# 攻撃・評価ライブラリ
+torchattacks>=2.0
+advex_uar==0.0.6.dev0
+lpips>=0.1.4
+
+# シリアライズ・セーフティ
+safetensors>=0.4.0
+numpy>=1.24.0
+
+# ビジュアライゼーション・ユーティリティ
+matplotlib>=3.6.0
+pandas>=1.5.0
+opencv-python>=4.9.0
+Pillow>=11.0.0
+tqdm>=4.62.0
+
+# メトリクス・評価
+torchmetrics>=0.6.0
+torcheval>=0.0.7
+
+# その他
+colorama>=0.4.6
+packaging>=25.0
+python-dotenv>=1.0.0
+
+# オプション（Colab で有用）
+xformers>=0.0.27  # メモリ効率的な attention

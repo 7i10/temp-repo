@@ -1,8 +1,9 @@
-name: research
+name: 7i10
 channels:
-  - defaults
-  - conda-forge
   - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
 dependencies:
   - python=3.10
   - pip
@@ -12,7 +13,10 @@ dependencies:
   - opencv
   - pytorch::pytorch=2.4.0
   - pytorch::torchvision=0.19.0
+  - pytorch::torchaudio=2.4.0
+  - pytorch::pytorch-cuda=12.4
   - pip:
+      - python-dotenv
       - accelerate
       - torchattacks
       - advex_uar==0.0.6.dev0

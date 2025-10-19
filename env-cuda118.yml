@@ -1,0 +1,30 @@
+name: 7i10
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - numpy=1.23.5
+  - matplotlib=3.5.3
+  - pandas=1.5.3
+  - pip:
+      - python-dotenv
+      - accelerate
+      - torchattacks
+      - advex_uar==0.0.6.dev0
+      - git+https://github.com/fra31/auto-attack.git
+      - colorama
+      - datasets
+      - deeplake
+      - diffusers
+      - lpips
+      - packaging
+      - peft
+      - Pillow
+      - safetensors
+      - torcheval
+      - torchmetrics
+      - tqdm
+      - transformers
+      - xformers
