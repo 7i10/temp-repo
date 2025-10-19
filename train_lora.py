@@ -28,6 +28,7 @@ import torch.utils.checkpoint
 import torch.nn.functional as F
 
 from utils import *
+from dotenv import load_dotenv
 from pathlib import Path
 from tqdm.auto import tqdm
 from archs import get_archs
@@ -53,6 +54,8 @@ from diffusers import (
     StableDiffusionPipeline,
     UNet2DConditionModel,
 )
+
+load_dotenv()
 
 MAX_SEQ_LENGTH = 77
 check_min_version("0.31.0.dev0")
@@ -268,11 +271,14 @@ def main(args):
                     "If you observe problems during training, please update xFormers to at least 0.0.17."
                     "See https://huggingface.co/docs/diffusers/main/en/optimization/xformers for more details."
                 )
-            unet.enable_xformers_memory_efficient_attention()
-            teacher_unet.enable_xformers_memory_efficient_attention()
+            try:
+                unet.enable_xformers_memory_efficient_attention()
+                teacher_unet.enable_xformers_memory_efficient_attention()
+            except Exception as e:
+                logger.warning(f"Failed to enable xformers: {e}. Continuing without it.")
         else:
-            raise ValueError(
-                "xformers is not available. Make sure it is installed correctly"
+            logger.warning(
+                "xformers is not available. Continuing without memory-efficient attention."
             )
 
     # Enable TF32 for faster training on Ampere GPUs,
@@ -482,7 +488,10 @@ def main(args):
 
     # prepare classifier:
     classifier = get_archs(args.surrogate_model, "imagenet")
-    classifier = classifier.to(accelerator.device).eval()
+    classifier = classifier.to(accelerator.device).eval()  # Classifier on GPU for consistency
+    # Cast to half precision to save memory
+    if args.mixed_precision == "fp16":
+        classifier = classifier.half()
     decode_classifier = DecodeClassifier(
         classifier=classifier,
         vae=vae,
@@ -519,7 +528,7 @@ def main(args):
                 latents = latents.to(weight_dtype)
                 bsz = latents.shape[0]
                 
-                # ラベルの形状を修正（torchattacks用に1Dにする）
+                # ラベルの形状を修正
                 if label.dim() > 1:
                     label = label.squeeze()
                 if label.dim() == 0:
