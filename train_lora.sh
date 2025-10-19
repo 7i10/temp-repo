@@ -1,7 +1,12 @@
 export MODEL_NAME="stable-diffusion-v1-5/stable-diffusion-v1-5"
 export OUTPUT_DIR="./logs/OSCP"
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-accelerate launch train_lora.py \
+# 通常の実行の場合
+# accelerate launch train_lora.py \
+
+# バックグラウンドで実行する場合
+nohup accelerate launch train_lora.py \
     --pretrained_teacher_model=$MODEL_NAME \
     --output_dir=$OUTPUT_DIR \
     --mixed_precision=fp16 \
@@ -13,7 +18,7 @@ accelerate launch train_lora.py \
     --max_train_samples=40000 \
     --dataloader_num_workers=8 \
     --checkpointing_steps=2000 --checkpoints_total_limit=10 \
-    --train_batch_size=16 \
+    --train_batch_size=2 \
     --gradient_checkpointing --enable_xformers_memory_efficient_attention \
     --gradient_accumulation_steps=1 \
     --lr_scheduler="constant_with_warmup" \
@@ -21,4 +26,5 @@ accelerate launch train_lora.py \
     --report_to="tensorboard" \
     --seed=3407 \
     --use_deeplake \
-    --deeplake_subset=40000
+    --deeplake_subset=40000 \
+    > train.log 2>&1 &
