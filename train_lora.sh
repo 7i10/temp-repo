@@ -16,11 +16,11 @@ nohup accelerate launch train_lora.py \
     --learning_rate=1e-4 --loss_type="l2" --adam_weight_decay=0.0 \
     --max_train_steps=10000 \
     --max_train_samples=40000 \
-    --dataloader_num_workers=8 \
+    --dataloader_num_workers=4 \
     --checkpointing_steps=2000 --checkpoints_total_limit=10 \
     --train_batch_size=2 \
     --gradient_checkpointing --enable_xformers_memory_efficient_attention \
-    --gradient_accumulation_steps=1 \
+    --gradient_accumulation_steps=8 \
     --lr_scheduler="constant_with_warmup" \
     --resume_from_checkpoint=latest \
     --report_to="tensorboard" \
