@@ -10,9 +10,18 @@ class DecodeClassifier(torch.nn.Module):
         self.scaling_factor = scaling_factor
         self.size = size
 
-    def forward(self, x, ):
+    def forward(self, x):
+        # x on GPU
+        vae_device = next(self.vae.parameters()).device
+        x = x.to(vae_device)
+        
+        # Decode on GPU
         out = self.vae.decode(x / self.scaling_factor)["sample"]
+        
         out = out / 2 + 0.5
         out = F.interpolate(out, size=self.size, mode="bilinear")
-        out = self.classifier(out)
-        return out
+        
+        # Classifier on same device (GPU)
+        out_logits = self.classifier(out)
+        
+        return out_logits
