@@ -111,6 +111,9 @@ class TransformDatasetSD(torch.utils.data.Dataset):
         if isinstance(label, torch.Tensor):
             label = label.long()
         else:
+            # Convert numpy.uint32 and other unsupported types to int64
+            if hasattr(label, 'item'):  # numpy scalar or array
+                label = int(label)
             label = torch.tensor(label, dtype=torch.long)
 
         return image, label
