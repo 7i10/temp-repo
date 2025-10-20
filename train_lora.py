@@ -63,6 +63,11 @@ logger = get_logger(__name__)
 
 
 def main(args):
+    # DeepLake接続タイムアウト設定を追加
+    os.environ["DEEPLAKE_TIMEOUT"] = "60"  # 60秒のタイムアウト
+    os.environ["DEEPLAKE_CACHE_DIR"] = "/tmp/deeplake_cache"  # キャッシュディレクトリを指定
+    os.environ["DEEPLAKE_DOWNLOAD_TIMEOUT"] = "120"  # ダウンロードタイムアウト
+    
     logging_dir = Path(args.output_dir, args.logging_dir)
 
     accelerator_project_config = ProjectConfiguration(
@@ -336,29 +341,34 @@ def main(args):
                 batch_labels = []
 
                 for data in self.dataloader:
-                    # DeepLakeからのデータ取得方法に応じて調整
-                    if isinstance(data, dict):
-                        images = data["images"]
-                        labels = data["labels"]
-                    else:
-                        images, labels = data
+                    try:
+                        # DeepLakeからのデータ取得方法に応じて調整
+                        if isinstance(data, dict):
+                            images = data["images"]
+                            labels = data["labels"]
+                        else:
+                            images, labels = data
 
-                    # バッチに追加
-                    if images.dim() == 3:  # シングル画像の場合
-                        images = images.unsqueeze(0)
-                    if labels.dim() == 0:  # シングルラベルの場合
-                        labels = labels.unsqueeze(0)
+                        # バッチに追加
+                        if images.dim() == 3:  # シングル画像の場合
+                            images = images.unsqueeze(0)
+                        if labels.dim() == 0:  # シングルラベルの場合
+                            labels = labels.unsqueeze(0)
 
-                    batch_images.append(images)
-                    batch_labels.append(labels)
+                        batch_images.append(images)
+                        batch_labels.append(labels)
 
-                    if len(batch_images) >= self.batch_size:
-                        yield (
-                            torch.cat(batch_images, dim=0),
-                            torch.cat(batch_labels, dim=0),
-                        )
-                        batch_images = []
-                        batch_labels = []
+                        if len(batch_images) >= self.batch_size:
+                            yield (
+                                torch.cat(batch_images, dim=0),
+                                torch.cat(batch_labels, dim=0),
+                            )
+                            batch_images = []
+                            batch_labels = []
+                    except (RuntimeError, ConnectionError, TimeoutError) as e:
+                        # ネットワークエラーの場合はスキップして続行
+                        logger.warning(f"Skipping batch due to network error: {str(e)[:100]}")
+                        continue
 
                 # 残りのバッチ
                 if batch_images:

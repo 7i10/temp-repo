@@ -61,28 +61,45 @@ class TransformDataset(torch.utils.data.Dataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        batch = self.dataset[idx]
-        image = batch["images"]
-        label = batch["labels"]
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                batch = self.dataset[idx]
+                image = batch["images"]
+                label = batch["labels"]
 
-        # PIL Imageに変換
-        if isinstance(image, torch.Tensor):
-            image = transforms.ToPILImage()(image)
-        elif hasattr(image, "numpy"):
-            img_array = image.numpy()
-            img_array = _normalize_image_array(img_array)
-            image = Image.fromarray(img_array)
+                # PIL Imageに変換
+                if isinstance(image, torch.Tensor):
+                    image = transforms.ToPILImage()(image)
+                elif hasattr(image, "numpy"):
+                    img_array = image.numpy()
+                    img_array = _normalize_image_array(img_array)
+                    image = Image.fromarray(img_array)
 
-        if self.transform:
-            image = self.transform(image)
+                if self.transform:
+                    image = self.transform(image)
 
-        # ラベルをlong型に変換
-        if isinstance(label, torch.Tensor):
-            label = label.long()
-        else:
-            label = torch.tensor(label, dtype=torch.long)
+                # ラベルをlong型に変換
+                if isinstance(label, torch.Tensor):
+                    label = label.long()
+                else:
+                    label = torch.tensor(label, dtype=torch.long)
 
-        return image, label
+                return image, label
+            except (RuntimeError, ConnectionError, TimeoutError) as e:
+                if attempt < max_retries - 1:
+                    import time
+                    print(f"Retry {attempt + 1}/{max_retries} for index {idx} due to: {str(e)[:100]}")
+                    time.sleep(2 ** attempt)  # exponential backoff
+                    continue
+                else:
+                    # 最後の試行失敗時は黒い画像とランダムラベルを返す
+                    print(f"Failed to load index {idx} after {max_retries} retries. Using fallback image.")
+                    image = Image.new("RGB", (224, 224), color="black")
+                    if self.transform:
+                        image = self.transform(image)
+                    label = torch.tensor(0, dtype=torch.long)
+                    return image, label
 
 
 class TransformDatasetSD(torch.utils.data.Dataset):
@@ -94,29 +111,46 @@ class TransformDatasetSD(torch.utils.data.Dataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        batch = self.dataset[idx]
-        image = batch["images"]
-        label = batch["labels"]
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                batch = self.dataset[idx]
+                image = batch["images"]
+                label = batch["labels"]
 
-        if isinstance(image, torch.Tensor):
-            image = transforms.ToPILImage()(image)
-        elif hasattr(image, "numpy"):
-            img_array = image.numpy()
-            img_array = _normalize_image_array(img_array)
-            image = Image.fromarray(img_array)
+                if isinstance(image, torch.Tensor):
+                    image = transforms.ToPILImage()(image)
+                elif hasattr(image, "numpy"):
+                    img_array = image.numpy()
+                    img_array = _normalize_image_array(img_array)
+                    image = Image.fromarray(img_array)
 
-        if self.transform:
-            image = self.transform(image)
+                if self.transform:
+                    image = self.transform(image)
 
-        if isinstance(label, torch.Tensor):
-            label = label.long()
-        else:
-            # Convert numpy.uint32 and other unsupported types to int64
-            if hasattr(label, 'item'):  # numpy scalar or array
-                label = int(label)
-            label = torch.tensor(label, dtype=torch.long)
+                if isinstance(label, torch.Tensor):
+                    label = label.long()
+                else:
+                    # Convert numpy.uint32 and other unsupported types to int64
+                    if hasattr(label, 'item'):  # numpy scalar or array
+                        label = int(label)
+                    label = torch.tensor(label, dtype=torch.long)
 
-        return image, label
+                return image, label
+            except (RuntimeError, ConnectionError, TimeoutError) as e:
+                if attempt < max_retries - 1:
+                    import time
+                    print(f"Retry {attempt + 1}/{max_retries} for index {idx} due to: {str(e)[:100]}")
+                    time.sleep(2 ** attempt)  # exponential backoff
+                    continue
+                else:
+                    # 最後の試行失敗時は黒い画像とランダムラベルを返す
+                    print(f"Failed to load index {idx} after {max_retries} retries. Using fallback image.")
+                    image = Image.new("RGB", (224, 224), color="black")
+                    if self.transform:
+                        image = self.transform(image)
+                    label = torch.tensor(0, dtype=torch.long)
+                    return image, label
 
 
 # DeepLake support
@@ -295,8 +329,9 @@ def _imagenet_deeplake(split: str, subset_size: int = 40000):
             dataset_with_transform,
             batch_size=1,  # train_lora.pyで再度バッチ化するため1に設定
             sampler=sampler,
-            num_workers=2,
+            num_workers=0,  # DeepLakeはマルチプロセッシング非対応なため0に設定
             drop_last=False,
+            persistent_workers=False,
         )
 
         return dataloader
@@ -400,8 +435,9 @@ def _imagenet_deeplake_sd(split: str, subset_size: int = 40000):
             dataset_with_transform,
             batch_size=1,
             sampler=sampler,
-            num_workers=2,
+            num_workers=0,  # DeepLakeはマルチプロセッシング非対応なため0に設定
             drop_last=False,
+            persistent_workers=False,
         )
 
         return dataloader
