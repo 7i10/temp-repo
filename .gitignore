@@ -1,6 +1,7 @@
 data/
 docs/
 logs/
+temp/
 .env
 
 # Python
