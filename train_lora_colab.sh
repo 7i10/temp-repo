@@ -16,10 +16,10 @@ accelerate launch train_lora.py \
     --learning_rate=1e-4 \
     --loss_type=l2 \
     --adam_weight_decay=0.0 \
-    --max_train_steps=1250 \
+    --max_train_steps=625 \
     --max_train_samples=40000 \
-    --dataloader_num_workers=4 \
-    --checkpointing_steps=250 \
+    --dataloader_num_workers=0 \
+    --checkpointing_steps=625 \
     --checkpoints_total_limit=10 \
     --train_batch_size=64 \
     --gradient_checkpointing \
